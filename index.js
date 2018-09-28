@@ -65,11 +65,17 @@ if (argv.ssl) {
   }
 }
 
+if (process.env.http_proxy) {
+  require('global-tunnel-ng').initialize();
+}
+
+var http = require('http');
 var proxy = require('http-proxy').createProxyServer({
   target: argv.target,
   headers: headers,
   ssl: ssl,
-  xfwd: argv['x-fordward']
+  xfwd: argv['x-fordward'],
+  agent: http.globalAgent
 });
 proxy.listen(argv.port);
 
