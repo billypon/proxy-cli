@@ -74,7 +74,7 @@ var proxy = require('http-proxy').createProxyServer({
   target: argv.target,
   headers: headers,
   ssl: ssl,
-  xfwd: argv['x-fordward'],
+  xfwd: argv['x-forward'],
   agent: http.globalAgent
 });
 proxy.listen(argv.port);
