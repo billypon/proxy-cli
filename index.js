@@ -11,8 +11,8 @@ var argv = minimist(process.argv.slice(2), {
     target: 't',
     port: 'p',
     header: 'h',
-    Header: 'H',
-    'x-forward': 'x'
+    'x-forward': 'x',
+    'x-forward-head': 'X'
   },
   boolean: ['ssl', 'x-forward']
 });
@@ -36,8 +36,8 @@ if (argv.header) {
     }
   });
 }
-if (argv.Header) {
-  argv.Header.split('&').forEach(function (x) {
+if (argv['x-forward-head']) {
+  argv['x-forward-head'].split('&').forEach(function (x) {
     var array = x.split('=');
     if (array.length == 2) {
       headers['x-forwarded-' + array[0]] = array[1];
