@@ -11,6 +11,7 @@ var argv = minimist(process.argv.slice(2), {
     target: 't',
     port: 'p',
     header: 'h',
+    Header: 'H',
     'x-forward': 'x',
     'x-forward-head': 'X'
   },
@@ -77,6 +78,20 @@ var proxy = require('http-proxy').createProxyServer({
   xfwd: argv['x-forward'],
   agent: http.globalAgent
 });
+if (argv.Header) {
+  var Headers = {};
+  argv.Header.split('&').forEach(function (x) {
+    var array = x.split('=');
+    if (array.length == 2) {
+      Headers[array[0]] = array[1];
+    }
+  });
+  proxy.on('proxyRes', function (proxyRes) {
+    for (var x in Headers) {
+      proxyRes.headers[x] = Headers[x];
+    }
+  })
+}
 proxy.listen(argv.port);
 
 console.log('http' + (argv.ssl ? 's' : '')  + ' proxy started on http' + (argv.ssl ? 's' : '') + '://localhost:' + argv.port);
