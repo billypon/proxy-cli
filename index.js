@@ -13,9 +13,11 @@ var argv = minimist(process.argv.slice(2), {
     header: 'h',
     Header: 'H',
     'x-forward': 'x',
-    'x-forward-head': 'X'
+    'x-forward-head': 'X',
+    'access-control': 'a',
+    'access-control-head': 'A'
   },
-  boolean: ['ssl', 'x-forward']
+  boolean: ['ssl', 'x-forward', 'access-control']
 });
 
 if (!argv.target) {
@@ -42,6 +44,46 @@ if (argv['x-forward-head']) {
     var array = x.split('=');
     if (array.length == 2) {
       headers['x-forwarded-' + array[0]] = array[1];
+    }
+  });
+}
+
+var Headers;
+if (argv['access-control']) {
+  Headers = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': '*',
+    'access-control-allow-headers': '*'
+  }
+  var webPass = require('http-proxy/lib/http-proxy/passes/web-incoming');
+  var webStream = webPass.stream;
+  webPass.stream = function (req, res) {
+    if (req.method !== 'OPTIONS' || req.url !== '/') {
+      return webStream.apply(webPass, arguments);
+    }
+    for (var x in Headers) {
+      res.setHeader(x, Headers[x]);
+    }
+    res.setHeader('content-length', '0');
+    res.statusCode = 204;
+    res.end();
+  }
+}
+if (argv['access-control-head']) {
+  Headers = Headers || {};
+  argv['access-control-head'].split('&').forEach(function (x) {
+    var array = x.split('=');
+    if (array.length == 2) {
+      Headers['access-control-' + array[0]] = array[1];
+    }
+  });
+}
+if (argv.Header) {
+  Headers = Headers || {};
+  argv.Header.split('&').forEach(function (x) {
+    var array = x.split('=');
+    if (array.length == 2) {
+      Headers[array[0]] = array[1];
     }
   });
 }
@@ -78,14 +120,7 @@ var proxy = require('http-proxy').createProxyServer({
   xfwd: argv['x-forward'],
   agent: http.globalAgent
 });
-if (argv.Header) {
-  var Headers = {};
-  argv.Header.split('&').forEach(function (x) {
-    var array = x.split('=');
-    if (array.length == 2) {
-      Headers[array[0]] = array[1];
-    }
-  });
+if (Headers) {
   proxy.on('proxyRes', function (proxyRes) {
     for (var x in Headers) {
       proxyRes.headers[x] = Headers[x];
