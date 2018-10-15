@@ -52,8 +52,7 @@ var Headers;
 if (argv['access-control']) {
   Headers = {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': '*',
-    'access-control-allow-headers': '*'
+    'access-control-allow-methods': 'get, post, put, delete, patch, head, options'
   }
   var webPass = require('http-proxy/lib/http-proxy/passes/web-incoming');
   var webStream = webPass.stream;
