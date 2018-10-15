@@ -57,16 +57,27 @@ var Headers;
 if (argv['access-control']) {
   Headers = {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'get, post, put, delete, patch, head, options'
+    'access-control-allow-methods': 'get, post, put, delete, patch, head, options',
+    'access-control-allow-headers': 'authorization'
+  }
+  var mapHeaders = {
+    origin: 'origin',
+    method: 'methods',
+    headers: 'headers'
   }
   var webPass = require('http-proxy/lib/http-proxy/passes/web-incoming');
   var webStream = webPass.stream;
   webPass.stream = function (req, res) {
-    if (req.method !== 'OPTIONS' || req.url !== '/') {
+    if (req.method !== 'OPTIONS') {
       return webStream.apply(webPass, arguments);
     }
     for (var x in Headers) {
       res.setHeader(x, Headers[x]);
+    }
+    for (var x in mapHeaders) {
+      if (req.headers['access-control-request-' + x]) {
+        res.setHeader('access-control-allow-' + mapHeaders[x], req.headers['access-control-request-' + x]);
+      }
     }
     res.setHeader('content-length', '0');
     res.statusCode = 204;
