@@ -20,6 +20,11 @@ var argv = minimist(process.argv.slice(2), {
   boolean: ['ssl', 'x-forward', 'access-control']
 });
 
+if (argv.help) {
+  showHelpMessage();
+  return;
+}
+
 if (!argv.target) {
   console.error('target is empty');
   process.exit(-1);
@@ -129,3 +134,17 @@ if (Headers) {
 proxy.listen(argv.port);
 
 console.log('http' + (argv.ssl ? 's' : '')  + ' proxy started on http' + (argv.ssl ? 's' : '') + '://localhost:' + argv.port);
+
+function showHelpMessage() {
+  console.log('Usage: proxy -p <port> -t <target> [options...]');
+  console.log();
+  console.log('Options:');
+  console.log('  -a, --access-control      Auto add Access-Control-* headers to response (Allow-Origin/Allow-Methods)');
+  console.log('  -A, --access-control-head Add Access-Controll-* headers to response');
+  console.log('  -h, --head                Add headers to request');
+  console.log('  -H, --Head                Add headers to response');
+  console.log('  -p, --port                Set listening port');
+  console.log('  -t, --target              Set target url');
+  console.log('  -x, --x-forward           Auto add X-Forwarded-* headers to request (For/Proto/Host/Port)');
+  console.log('  -X, --x-forward-head      Add X-Forwarded-* headers to request');
+}
